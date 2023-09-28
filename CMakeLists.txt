@@ -11,6 +11,14 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 find_package(Boost COMPONENTS system REQUIRED)
 
+# see https://www.sqlite.org/howtocompile.html
+include(FetchContent)
+FetchContent_Declare(sqlite3 URL "https://www.sqlite.org/snapshot/sqlite-snapshot-202205041843.tar.gz")
+FetchContent_MakeAvailable(sqlite3)
+if(NOT sqlite3_POPULATED)
+	FetchContent_Populate(sqlite3)
+endif()
+
 if (MSVC)
 	add_compile_options(/W4)
 	add_definitions(-D_WIN32_WINNT=0x0501)

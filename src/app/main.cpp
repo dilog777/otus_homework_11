@@ -4,6 +4,10 @@
 #include "ClientServer.h"
 #include "StringConverter.hpp"
 
+#include "SqlServer.h"
+
+
+
 const char *const USAGE_MESSAGE = "Usage: join_server <port>";
 
 
@@ -17,6 +21,8 @@ int main(int argc, char *argv[])
 	}
 
 	auto port = StringConverter::stringToType<ClientServer::Port>(argv[1]);
+
+	SqlServer srv("qwerty");
 
 //	auto commandExecutor = std::make_shared<ClientCommandExecutor>(blockSize);
 //	ClientServer server(commandExecutor);
