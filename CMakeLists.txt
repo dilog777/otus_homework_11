@@ -9,8 +9,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+find_package(Boost COMPONENTS system REQUIRED)
+
 if (MSVC)
 	add_compile_options(/W4)
+	add_definitions(-D_WIN32_WINNT=0x0501)
 else()
 	add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
