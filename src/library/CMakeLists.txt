@@ -8,6 +8,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+# PUBLIC to usage StringConverter.hpp
+target_include_directories(${PROJECT_NAME} PUBLIC
 	${Boost_INCLUDE_DIR}
 )
