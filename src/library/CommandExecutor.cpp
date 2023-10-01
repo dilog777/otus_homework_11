@@ -1,12 +1,13 @@
 #include "CommandExecutor.h"
 
 #include <cassert>
-#include <format>
+
+#include <boost/format.hpp>
 
 #include "Command/Command.h"
 
 const char *const SQL_DB_NAME = "cpp_sqlite_db.sqlite";
-const char *const SQL_CREATE_TABLE_TEMPLATE = "CREATE TABLE IF NOT EXISTS {} (id int PRIMARY KEY, name text);";
+const char *const SQL_CREATE_TABLE_TEMPLATE = "CREATE TABLE IF NOT EXISTS %1% (id int PRIMARY KEY, name text);";
 
 
 
@@ -41,11 +42,11 @@ void CommandExecutor::init()
 	isOk = _sqlServer->open(SQL_DB_NAME, error);
 	assert(isOk && error.empty());
 
-	std::string request1 = std::format(SQL_CREATE_TABLE_TEMPLATE, "A");
+	std::string request1 = (boost::format { SQL_CREATE_TABLE_TEMPLATE } % "A").str();
 	isOk = _sqlServer->runRequest(request1, answer, error);
 	assert(isOk && error.empty());
 
-	std::string request2 = std::format(SQL_CREATE_TABLE_TEMPLATE, "B");
+	std::string request2 = (boost::format { SQL_CREATE_TABLE_TEMPLATE } % "B").str();
 	isOk = _sqlServer->runRequest(request1, answer, error);
 	assert(isOk && error.empty());
 }

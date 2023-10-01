@@ -1,10 +1,10 @@
 #include "CommandInsert.h"
 
-#include <format>
+#include <boost/format.hpp>
 
 #include "CommandMachine.h"
 
-const char *const SQL_REQEST_TEMPLATE = "INSERT INTO {} VALUES({}, '{}');";
+const char *const SQL_REQEST_TEMPLATE = "INSERT INTO %s VALUES(%s, '%s');";
 
 
 
@@ -21,7 +21,7 @@ void CommandInsert::execute(CommandMachine *machine) const
 {
 	SqlServer::Answer answer;
 	std::string error;
-	std::string request = std::format(SQL_REQEST_TEMPLATE, _table, _id, _name);
+	std::string request = (boost::format { SQL_REQEST_TEMPLATE } % _table % _id % _name).str();
 	[[maybe_unused]] bool isOk = machine->runRequest(request, answer, error);
 
 	//assert(isOk && error.empty());
