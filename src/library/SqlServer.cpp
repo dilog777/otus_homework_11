@@ -1,76 +1,88 @@
 #include "SqlServer.h"
 
-#include <iostream>
-
 #include "sqlite3.h"
 
+const char *const NULL_DATA_STRING = "NULL";
 
 
-class SqlServer::Impl
+
+std::vector<std::string> readData(int count, char **data)
 {
-public:
-	Impl();
+	std::vector<std::string> result;
+	result.reserve(count);
 
-	int test(const std::string &request);
-
-private:
-
-};
-
-
-
-SqlServer::Impl::Impl()
-{
-}
-
-
-
-int SqlServer::Impl::test(const std::string &request)
-{
-	const char *db_name = "cpp_sqlite_db.sqlite";
-	// const char* db_name = ":memory:"; // <--- без файла, БД размещается в памяти
-	sqlite3 *handle = nullptr;
-
-	if (sqlite3_open(db_name, &handle))
+	for (int i = 0; i < count; ++i)
 	{
-		std::cerr << "Can't open database: " << sqlite3_errmsg(handle) << std::endl;
-		sqlite3_close(handle);
-		return EXIT_FAILURE;
+		result.emplace_back(data[i] ? data[i] : NULL_DATA_STRING);
 	}
-	std::cout << db_name << " database opened successfully!" << std::endl;
 
-	auto print_results = [](void *, int columns, char **data, char **names) -> int
-	{
-		for (int i = 0; i < columns; ++i)
-			std::cout << names[i] << " = " << (data[i] ? data[i] : "NULL") << std::endl;
-		std::cout << std::endl;
-		return 0;
-	};
-
-	char *errmsg;
-	int rc = sqlite3_exec(handle, request.c_str(), print_results, 0, &errmsg);
-	if (rc != SQLITE_OK)
-	{
-		std::cerr << "Can't execute query: " << errmsg << std::endl;
-		sqlite3_free(errmsg); // <--- обратите внимание не C-style работу с памятью
-		return EXIT_FAILURE;
-	}
-	sqlite3_close(handle);
-
-	return EXIT_SUCCESS;
-}
-
-
-
-SqlServer::SqlServer(const std::string &str)
-	: _impl { new Impl }
-{
-	std::cout << str;
+	return result;
 }
 
 
 
 SqlServer::~SqlServer()
 {
-	delete _impl;
+	close();
+}
+
+
+
+bool SqlServer::open(const std::string &dbName, std::string &error)
+{
+	int rc = sqlite3_open(dbName.c_str(), &_handle);
+	if (rc == SQLITE_OK)
+		return true;
+
+	error = sqlite3_errmsg(_handle);
+
+	return false;
+}
+
+
+
+bool SqlServer::runRequest(const std::string &request, Answer &answer, std::string &error)
+{
+	if (!_handle)
+		return false;
+
+	auto readAnswer = [](void *ptr, int columns, char **data, char **names) -> int
+	{
+		if (ptr == nullptr)
+			return 0;
+		
+		Answer *answer = static_cast<Answer *>(ptr);
+
+		if (answer->_headers.empty())
+			answer->_headers = readData(columns, names);
+
+		auto row = readData(columns, data);
+		answer->_rows.push_back(row);
+
+		return 0;		
+	};
+
+	char *errmsg;
+	int rc = sqlite3_exec(_handle, request.c_str(), readAnswer, &answer, &errmsg);
+	if (rc == SQLITE_OK)
+		return true;
+
+	error = errmsg;
+	sqlite3_free(errmsg);
+
+	return false;
+}
+
+
+
+bool SqlServer::close()
+{
+	if (!_handle)
+		return true;
+
+	int rc = sqlite3_close(_handle);
+
+	_handle = nullptr;
+
+	return (rc == SQLITE_OK);
 }
