@@ -4,23 +4,19 @@
 #include <vector>
 
 struct sqlite3;
+struct SqlTableData;
 
 
 
 class SqlServer
 {
 public:
-	struct Answer
-	{
-		std::vector<std::string> _headers;
-		std::vector<std::vector<std::string>> _rows;
-	};
-	
 	~SqlServer();
 
 	bool open(const std::string &dbName, std::string &error);
-	bool runRequest(const std::string &request, Answer &answer, std::string &error);
 	bool close();
+
+	bool runRequest(const std::string &request, std::string &error, SqlTableData *answer);
 
 private:
 	sqlite3 *_handle { nullptr };

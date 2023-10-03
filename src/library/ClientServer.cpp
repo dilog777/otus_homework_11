@@ -1,5 +1,7 @@
 #include "ClientServer.h"
 
+#include <iostream>
+
 #include <boost/algorithm/string/trim_all.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
@@ -8,6 +10,7 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/asio/write.hpp>
 
 #include "ClientMessageHandler.h"
 
@@ -57,28 +60,22 @@ asio::awaitable<void> ClientServer::Impl::listenClient(tcp::socket socket)
 {
 	asio::streambuf buffer;
 
-	ClientMessageHandler::ClientId clientId = &socket;
-	_messageHandler->ClientConnected(clientId);
-
 	for (;;)
 	{
-		try
-		{
-			co_await asio::async_read_until(socket, buffer, "\n", asio::use_awaitable);
-		}
-		catch (const boost::system::system_error &)
-		{
-			break;
-		}
+		co_await asio::async_read_until(socket, buffer, "\n", asio::use_awaitable);
 
 		std::string message(asio::buffer_cast<const char *>(buffer.data()), buffer.size());
 		boost::trim(message);
-		_messageHandler->ClientSendMessage(clientId, message);
-
 		buffer.consume(buffer.size());
-	}
 
-	_messageHandler->ClientDisconnected(clientId);
+		std::cout << message << std::endl;
+
+		std::string answer = _messageHandler->processClientMessage(message);
+
+		std::cout << answer << std::endl;
+
+		co_await asio::async_write(socket, asio::buffer(answer), asio::use_awaitable);
+	}
 }
 
 

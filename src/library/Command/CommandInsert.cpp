@@ -1,5 +1,7 @@
 #include "CommandInsert.h"
 
+#include <sstream>
+
 #include <boost/format.hpp>
 
 #include "CommandMachine.h"
@@ -17,12 +19,14 @@ CommandInsert::CommandInsert(const std::string &table, const std::string &id, co
 
 
 
-void CommandInsert::execute(CommandMachine *machine) const
+std::string CommandInsert::execute(CommandMachine *machine) const
 {
-	SqlServer::Answer answer;
+	std::stringstream ss;
+	
 	std::string error;
 	std::string request = (boost::format { SQL_REQEST_TEMPLATE } % _table % _id % _name).str();
-	[[maybe_unused]] bool isOk = machine->runRequest(request, answer, error);
+	bool isOk = machine->runRequest(request, error);
+	ss << (isOk ? "OK" : error) << std::endl;
 
-	//assert(isOk && error.empty());
+	return ss.str();
 }

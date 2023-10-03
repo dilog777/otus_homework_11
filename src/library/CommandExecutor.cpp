@@ -5,6 +5,9 @@
 #include <boost/format.hpp>
 
 #include "Command/Command.h"
+#include "CommandFactory.h"
+#include "SqlServer.h"
+#include "SqlTableData.h"
 
 const char *const SQL_DB_NAME = "cpp_sqlite_db.sqlite";
 const char *const SQL_CREATE_TABLE_TEMPLATE = "CREATE TABLE IF NOT EXISTS %1% (id int PRIMARY KEY, name text);";
@@ -19,23 +22,34 @@ CommandExecutor::CommandExecutor()
 
 
 
-void CommandExecutor::execute(const std::shared_ptr<Command> &command)
+std::string CommandExecutor::processClientMessage(const std::string &message)
 {
-	command->execute(this);
+	std::string error;
+	auto command = CommandFactory::makeCommand(message, error);
+	if (!error.empty())
+		return error;
+
+	return command->execute(this);
 }
 
 
 
-bool CommandExecutor::runRequest(const std::string &request, SqlServer::Answer &answer, std::string &error)
+bool CommandExecutor::runRequest(const std::string &request, std::string &error)
 {
-	return _sqlServer->runRequest(request, answer, error);
+	return _sqlServer->runRequest(request, error, nullptr);
+}
+
+
+
+bool CommandExecutor::runRequest(const std::string &request, std::string &error, SqlTableData *answer)
+{
+	return _sqlServer->runRequest(request, error, answer);
 }
 
 
 
 void CommandExecutor::init()
 {
-	SqlServer::Answer answer;
 	std::string error;
 	bool isOk;
 
@@ -43,10 +57,10 @@ void CommandExecutor::init()
 	assert(isOk && error.empty());
 
 	std::string request1 = (boost::format { SQL_CREATE_TABLE_TEMPLATE } % "A").str();
-	isOk = _sqlServer->runRequest(request1, answer, error);
+	isOk = _sqlServer->runRequest(request1, error, nullptr);
 	assert(isOk && error.empty());
 
 	std::string request2 = (boost::format { SQL_CREATE_TABLE_TEMPLATE } % "B").str();
-	isOk = _sqlServer->runRequest(request1, answer, error);
+	isOk = _sqlServer->runRequest(request1, error, nullptr);
 	assert(isOk && error.empty());
 }

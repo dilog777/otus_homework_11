@@ -2,12 +2,16 @@
 
 #include <memory>
 
+#include "GlobalMacroses.h"
+
 class ClientMessageHandler;
 
 
 
 class ClientServer
 {
+	DISABLE_COPY(ClientServer)
+
 public:
 	ClientServer(const std::shared_ptr<ClientMessageHandler> &messageHandler);
 	~ClientServer();

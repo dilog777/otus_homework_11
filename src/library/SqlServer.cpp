@@ -2,7 +2,9 @@
 
 #include "sqlite3.h"
 
-const char *const NULL_DATA_STRING = "NULL";
+#include "SqlTableData.h"
+
+const char *const NULL_DATA_STRING = "";
 
 
 
@@ -41,7 +43,21 @@ bool SqlServer::open(const std::string &dbName, std::string &error)
 
 
 
-bool SqlServer::runRequest(const std::string &request, Answer &answer, std::string &error)
+bool SqlServer::close()
+{
+	if (!_handle)
+		return true;
+
+	int rc = sqlite3_close(_handle);
+
+	_handle = nullptr;
+
+	return (rc == SQLITE_OK);
+}
+
+
+
+bool SqlServer::runRequest(const std::string &request, std::string &error, SqlTableData *answer)
 {
 	if (!_handle)
 		return false;
@@ -51,7 +67,7 @@ bool SqlServer::runRequest(const std::string &request, Answer &answer, std::stri
 		if (ptr == nullptr)
 			return 0;
 		
-		Answer *answer = static_cast<Answer *>(ptr);
+		SqlTableData *answer = static_cast<SqlTableData *>(ptr);
 
 		if (answer->_headers.empty())
 			answer->_headers = readData(columns, names);
@@ -63,7 +79,7 @@ bool SqlServer::runRequest(const std::string &request, Answer &answer, std::stri
 	};
 
 	char *errmsg;
-	int rc = sqlite3_exec(_handle, request.c_str(), readAnswer, &answer, &errmsg);
+	int rc = sqlite3_exec(_handle, request.c_str(), readAnswer, answer, &errmsg);
 	if (rc == SQLITE_OK)
 		return true;
 
@@ -71,18 +87,4 @@ bool SqlServer::runRequest(const std::string &request, Answer &answer, std::stri
 	sqlite3_free(errmsg);
 
 	return false;
-}
-
-
-
-bool SqlServer::close()
-{
-	if (!_handle)
-		return true;
-
-	int rc = sqlite3_close(_handle);
-
-	_handle = nullptr;
-
-	return (rc == SQLITE_OK);
 }

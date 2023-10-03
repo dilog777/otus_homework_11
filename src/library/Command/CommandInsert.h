@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "Command.h"
 
 
@@ -11,7 +9,7 @@ class CommandInsert : public Command
 public:
 	CommandInsert(const std::string &table, const std::string &id, const std::string &name);
 
-	void execute(CommandMachine *machine) const override;
+	std::string execute(CommandMachine *machine) const override;
 
 private:
 	std::string _table;
