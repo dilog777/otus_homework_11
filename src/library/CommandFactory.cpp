@@ -44,7 +44,7 @@ std::shared_ptr<Command> CommandFactory::makeCommand(const std::string &str, std
 		std::string name = tokens.at(3);
 		return std::make_shared<CommandInsert>(table, id, name);
 	}
-	else if (str == CMD_INTERSECTION)
+	else if (cmdName == CMD_INTERSECTION)
 	{
 		if (tokens.size() != 1)
 		{
@@ -56,7 +56,7 @@ std::shared_ptr<Command> CommandFactory::makeCommand(const std::string &str, std
 		std::string table2 = "B";
 		return std::make_shared<CommandIntersection>(table1, table2);
 	}
-	else if (str == CMD_SYMMETRIC_DIFFERENCE)
+	else if (cmdName == CMD_SYMMETRIC_DIFFERENCE)
 	{
 		if (tokens.size() != 1)
 		{
@@ -68,7 +68,7 @@ std::shared_ptr<Command> CommandFactory::makeCommand(const std::string &str, std
 		std::string table2 = "B";
 		return std::make_shared<CommandSymmetricDifference>(table1, table2);
 	}
-	else if (str == CMD_TRUNCATE)
+	else if (cmdName == CMD_TRUNCATE)
 	{
 		if (tokens.size() != 2)
 		{

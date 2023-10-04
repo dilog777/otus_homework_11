@@ -33,6 +33,9 @@ def main():
             user_input = input('> ')
             connection.sendall(f'{user_input}\n'.encode())
             data = connection.recv(1024)
+            if not data:
+                break;
+
             print(data.decode())
 
 if __name__ == '__main__':

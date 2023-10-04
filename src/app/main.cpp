@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 	auto port = StringConverter::stringToType<ClientServer::Port>(argv[1]);
 
 	auto commandExecutor = std::make_shared<CommandExecutor>();
+
 	ClientServer server(commandExecutor);
 
 	server.run(port);

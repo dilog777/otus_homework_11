@@ -1,7 +1,5 @@
 #include "ClientServer.h"
 
-#include <iostream>
-
 #include <boost/algorithm/string/trim_all.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
@@ -68,11 +66,7 @@ asio::awaitable<void> ClientServer::Impl::listenClient(tcp::socket socket)
 		boost::trim(message);
 		buffer.consume(buffer.size());
 
-		std::cout << message << std::endl;
-
 		std::string answer = _messageHandler->processClientMessage(message);
-
-		std::cout << answer << std::endl;
 
 		co_await asio::async_write(socket, asio::buffer(answer), asio::use_awaitable);
 	}
